@@ -4,10 +4,7 @@
   "builds": [
     {
       "src": "health_connect/wsgi.py",
-      "use": "@vercel/python",
-      "config": {
-        "wsgiHandler": "health_connect.wsgi.application"
-      }
+      "use": "@vercel/python"
     }
   ],
   "routes": [
