@@ -1,5 +1,6 @@
 import json
 import socket
+from functools import wraps
 
 from django.contrib import auth
 from django.contrib.auth.decorators import login_required
@@ -10,6 +11,17 @@ from django.http import JsonResponse
 from django.shortcuts import render,redirect,HttpResponse
 from.models import *
 from datetime import datetime, timedelta, date, time
+
+
+def session_required(view_func):
+    @wraps(view_func)
+    def wrapper(request, *args, **kwargs):
+        # Check if user has a valid session ID
+
+        if not request.session.get('lid') or request.session['lid'] == '':
+            return redirect('/')
+        return view_func(request, *args, **kwargs)
+    return wrapper
 
 
 #common login code
@@ -171,24 +183,23 @@ def login_code(request):
 # admin  side
 
 
+@session_required
 def admin_hm(request):
     return render(request, 'ADMIN/adminindex.html')
 
-@login_required(login_url='/')
-
-
+@session_required
 def admin_view_complaints(request):
     ob = complaint_table.objects.all()
     return render(request, 'ADMIN/ADMIN VIEW COMPLAINTS.html',{"data":ob})
 
-@login_required(login_url='/')
+@session_required
 
 
 def admin_complaints_reply(request,id):
     com = complaint_table.objects.get(id=id)
     return render(request, 'ADMIN/ADMIN SEND REPLY.html',{'com':com})
 
-@login_required(login_url='/')
+@session_required
 
 def admin_complaints_reply_post(request):
     id = request.POST['id']
@@ -200,7 +211,7 @@ def admin_complaints_reply_post(request):
     return HttpResponse('''<script>
                             alert("Replied"),window.location="/admin_view_complaints"</script>''')
 
-@login_required(login_url='/')
+@session_required
 #admin view hospitals
 
 def admin_verify_hsptl(request):
@@ -208,7 +219,7 @@ def admin_verify_hsptl(request):
     return render(request, 'ADMIN/VERIFY HOSPITAL.html',{"data":ob})
 
 
-@login_required(login_url='/')
+@session_required
 # admin view lab
 
 
@@ -218,7 +229,7 @@ def admin_verify_lab(request):
 
 
 
-@login_required(login_url='/')
+@session_required
 
 
 #admin accept lab
@@ -232,7 +243,7 @@ def admin_accept_lab(request,id):
 
 
 
-@login_required(login_url='/')
+@session_required
 
 #admin reject lab
 def admin_reject_lab(request,id):
@@ -244,7 +255,7 @@ def admin_reject_lab(request,id):
 
 
 #admin accept hospital\
-@login_required(login_url='/')
+@session_required
 
 def admin_accept_hsptl(request,id):
     ob=login_table.objects.get(id=id)
@@ -253,7 +264,7 @@ def admin_accept_hsptl(request,id):
     return HttpResponse('''<script>
             alert("accepted"),window.location="/admin_acpt_hs_doc"</script>''')
 
-@login_required(login_url='/')
+@session_required
 
 #admin reject hospital
 def admin_reject_hs(request,id):
@@ -263,7 +274,7 @@ def admin_reject_hs(request,id):
     return HttpResponse('''<script>
             alert("rejected"),window.location="/admin_acpt_hs_doc"</script>''')
 
-@login_required(login_url='/')
+@session_required
 
 
 #admin view accepted hs
@@ -276,7 +287,7 @@ def admin_acpt_hs_doc(request):
 
 # admin view accepted lab
 
-@login_required(login_url='/')
+@session_required
 
 def admin_acpt_lab(request):
     ob=lab_table.objects.filter(LOGIN__type='lab')
@@ -288,7 +299,7 @@ def admin_acpt_lab(request):
 
 
 # admin search lab
-@login_required(login_url='/')
+@session_required
 
 def admin_acpt_lab_search(request):
     n1=request.POST["n1"]
@@ -300,14 +311,14 @@ def admin_acpt_lab_search(request):
 
 # admin search hospital
 
-@login_required(login_url='/')
+@session_required
 
 def admin_acpt_hs_doc_search(request):
     n1=request.POST["n1"]
     ob=hospital_table.objects.filter(LOGIN__type='hospital',name__icontains=n1)
     return render(request, 'ADMIN/VIEW ACTP HSPTL & DCTR.html',{"data":ob})
 
-@login_required(login_url='/')
+@session_required
 
 #admin view bookings
 
@@ -315,7 +326,7 @@ def admin_view_bookings(request,hid):
     ob=booking_table.objects.filter(SCHEDULE__DOCTOR__HOSPITAL=hid)
     return render(request, 'ADMIN/VIEW BOOKINGS.html',{"data":ob})
 
-@login_required(login_url='/')
+@session_required
 
 #admin view doctor
 
@@ -323,7 +334,7 @@ def admin_view_dctr(request,id):
     ob=doctor_table.objects.filter(HOSPITAL=id)
     return render(request, 'ADMIN/ADMIN VIEW DR.html',{"data":ob})
 
-@login_required(login_url='/')
+@session_required
 
 
 
@@ -334,27 +345,27 @@ def doc_dash(request):
     return render(request, 'DOCTOR/doctor_view_data.html')
 
 
-@login_required(login_url='/')
+@session_required
 def doc_view_prf(request):
     ob = doctor_table.objects.get(LOGIN=request.session["lid"])
     return render(request, 'DOCTOR/DOC VIEW PROFILE.html', {"data": ob})
 
 
-@login_required(login_url='/')
+@session_required
 def doc_view_sc(request):
     today = date.today()
     ob = schedule_table.objects.filter(DOCTOR__LOGIN=request.session["lid"], date__gte=today)
     return render(request, 'DOCTOR/DOC VIEW SCHDLE.html', {"d": ob})
 
 
-@login_required(login_url='/')
+@session_required
 def doc_edit_prf(request):
     ob = doctor_table.objects.get(LOGIN=request.session["lid"])
     ob2 = hospital_table.objects.all()
     return render(request, 'DOCTOR/DOC EDIT PROFILE.html', {"i": ob, 'j': ob2})
 
 
-@login_required(login_url='/')
+@session_required
 def doc_editprof(request):
     name = request.POST['textfield']
     email = request.POST['textfield2']
@@ -385,25 +396,25 @@ def doc_editprof(request):
     return HttpResponse('''<script>alert('success');window.location='/doc_view_prf'</script>''')
 
 
-@login_required(login_url='/')
+@session_required
 def doc_view_rvw(request):
     obd = doctor_table.objects.get(LOGIN=request.session["lid"])
     ob = review_table.objects.filter(HOSPITAL=obd.HOSPITAL.id)
     return render(request, 'DOCTOR/DOC VIEW REVIEW.html', {"data": ob})
 
 
-@login_required(login_url='/')
+@session_required
 def doc_view_schdl(request):
     return render(request, 'DOCTOR/DOC VIEW SCHDLE.html')
 
 
-@login_required(login_url='/')
+@session_required
 def doc_pres(request, id):
     ob = prescription_table.objects.all()
     return render(request, 'DOCTOR/ADD PRESCRIPTION.html', {"data": ob})
 
 
-@login_required(login_url='/')
+@session_required
 def doc_view_bookings(request, id):
     a = schedule_table.objects.get(id=id)
     print(a.date, 'ygyugyugyugyugyugyu')
@@ -412,7 +423,7 @@ def doc_view_bookings(request, id):
     return render(request, 'DOCTOR/DOC VIEW BOOKINGS.html', {"data": ob, "past_data": past})
 
 
-@login_required(login_url='/')
+@session_required
 def doc_add_prescription(request, id):
     request.session['bid'] = id
 
@@ -427,13 +438,13 @@ def doc_add_prescription(request, id):
     return render(request, 'DOCTOR/ADD PRES.html', {"data": bid})
 
 
-@login_required(login_url='/')
+@session_required
 def doc_view_past_pres(request, id):
     did = prescription_table.objects.filter(BOOKING_id=id)
     return render(request, 'DOCTOR/DOC PREV PRES.html', {"data": did})
 
 
-@login_required(login_url='/')
+@session_required
 
 
 #
@@ -611,20 +622,20 @@ def doc_add_pre(request):
 #     return HttpResponse("Invalid request method.", status=405)
 
 
-@login_required(login_url='/')
+@session_required
 # def doc_re_pres(request,id):
 #     sc = booking_table.objects.get(id=id)
 #     sc.status = 'booked'
 #     sc.save()
 #     return HttpResponse('''<script>alert("data added"),window.location="/doc_view_sc#a"</script>''')
-# @login_required(login_url='/')
-@login_required(login_url='/')
+# @session_required
+@session_required
 def doc_ch(request):
     ob = doctor_table.objects.get(LOGIN=request.session["lid"])
     return render(request, 'DOCTOR/DR CHANGE PASSWORD.html', {"data": ob})
 
 
-@login_required(login_url='/')
+@session_required
 def doc_ch_change(request):
     current = request.POST['textfield']
     new = request.POST['textfield2']
@@ -640,7 +651,7 @@ def doc_ch_change(request):
         return HttpResponse('''<script>alert('Password invalid');window.location='/doc_ch'</script>''')
 
 
-@login_required(login_url='/')
+@session_required
 
 #hospital  side
 
@@ -706,7 +717,7 @@ def delete_dr(request,id):
     return HttpResponse('''<script>
                 alert("deleted"),window.location="/hs_mng_dctr"</script>''')
 
-@login_required(login_url='/')
+@session_required
 
 
 
@@ -718,7 +729,7 @@ def edit_dr(request,id):
     ob = doctor_table.objects.get(id=id)
     return render(request,"HOSPITAL/HS EDIT DOCTOR.html",{"i":ob})
 
-@login_required(login_url='/')
+@session_required
 
 
 
@@ -762,7 +773,7 @@ def editdoctor(request):
         hsdob.save()
         return HttpResponse('''<script>alert('success');window.location='/hs_mng_dctr'</script>''')
 
-@login_required(login_url='/')
+@session_required
 
 
 
@@ -775,17 +786,17 @@ def editdoctor(request):
 def hs_change_pass(request):
     return render(request, 'HOSPITAL/HS CHANGE PASS.html')
 
-@login_required(login_url='/')
+@session_required
 def hs_dash(request):
 
     return render(request, 'HOSPITAL/hospitalindex.html')
 
-@login_required(login_url='/')
+@session_required
 
 def hs_log(request):
     return render(request, 'HOSPITAL/HS LOGIN.html')
 
-@login_required(login_url='/')
+@session_required
 
 
 def hs_add_dr_sc(request):
@@ -812,7 +823,7 @@ def list_dates_between(start_date_str, end_date_str):
 
     return date_list
 
-@login_required(login_url='/')
+@session_required
 
 def hs_add_dr_sc_post(request):
 
@@ -833,7 +844,7 @@ def hs_add_dr_sc_post(request):
             hsdrscob.save()
     return HttpResponse('''<script>alert('success');window.location='/hs_mng_dctr'</script>''')
 
-@login_required(login_url='/')
+@session_required
 
 
 def hs_mng_dr_sc(request,id):
@@ -841,7 +852,7 @@ def hs_mng_dr_sc(request,id):
     ob=schedule_table.objects.filter(DOCTOR__id=id)
     return render(request, 'HOSPITAL/HS MNG DCTR SCHDLE.html',{"sch":ob})
 
-@login_required(login_url='/')
+@session_required
 
 
 
@@ -903,7 +914,7 @@ def hs_view__bk(request,id):
 
 
 
-@login_required(login_url='/')
+@session_required
 
 
 
@@ -917,24 +928,24 @@ def hs_view__bk(request,id):
 
 
 
-@login_required(login_url='/')
+@session_required
 
 def hs_view_rvw(request):
     ob=review_table.objects.filter(HOSPITAL__LOGIN=request.session["lid"])
     return render(request,'HOSPITAL/HS VIEW REVIEW.html',{"data":ob})
 
-@login_required(login_url='/')
+@session_required
 
 def hs_view_complaint(request):
     ob=complaint_table.objects.all()
     return render(request, 'HOSPITAL/HS VIEW COMPLAINTS.html',{"data":ob})
 
-@login_required(login_url='/')
+@session_required
 
 def hs_ch(request):
     return render(request, 'HOSPITAL/HS CHANGE PASSWORD.html')
 
-@login_required(login_url='/')
+@session_required
 
 def hs_ch_change(request):
     current = request.POST['textfield']
@@ -950,21 +961,21 @@ def hs_ch_change(request):
     else:
         return HttpResponse('''<script>alert('Password invalid');window.location='/hs_ch'</script>''')
 
-@login_required(login_url='/')
+@session_required
 
 
 
 def hs_add_dr(request):
     return render(request, 'HOSPITAL/HS ADD DOCTOR.html')
 
-@login_required(login_url='/')
+@session_required
 
 
 def hs_user_prof(request,id):
     a=booking_table.objects.filter(id=id)
     return render(request, 'HOSPITAL/USER PROFILE.html',{'data':a})
 
-@login_required(login_url='/')
+@session_required
 
 
 
@@ -974,11 +985,11 @@ def hs_mng_dctr(request):
     hsdob=doctor_table.objects.filter(HOSPITAL__LOGIN=request.session["lid"])
     return render(request, 'HOSPITAL/HS MNG DCTR.html',{"data":hsdob})
 
-@login_required(login_url='/')
+@session_required
 
 
 
-@login_required(login_url='/')
+@session_required
 
 
 def hs_add_dr_post(request):
@@ -1020,13 +1031,30 @@ def hs_add_dr_post(request):
 
         return HttpResponse('''<script>alert('success');window.location='/hs_mng_dctr'</script>''')
 
-@login_required(login_url='/')
-
 def logout(request):
-    auth.logout(request)
-    return render(request,"Login.html")
+    
+    try:
+        session_keys_to_clear = ['lid', 'did', 'bid', 'uid', 'username', 'usertype']
+        for key in session_keys_to_clear:
+            if key in request.session:
+                del request.session[key]
 
-@login_required(login_url='/')
+        request.session.flush()
+
+        auth.logout(request)
+
+    except Exception as e:
+        print(f"Logout error: {str(e)}")
+
+    response = redirect('/')
+
+    response['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0'
+    response['Pragma'] = 'no-cache'
+    response['Expires'] = '0'
+
+    return response
+
+@session_required
 
 def ch_doc(request):
     return render(request,'HOSPITAL/CK_DOC_AV.html')
@@ -1189,7 +1217,7 @@ def lab_editprof(request):
 
     return HttpResponse('''<script>alert('success');window.location='/viewprofile#go'</script>''')
 
-@login_required(login_url='/')
+@session_required
 
 
 def lab_ch_change(request):
@@ -1206,7 +1234,7 @@ def lab_ch_change(request):
     else:
         return HttpResponse('''<script>alert('Password invalid');window.location='/ch_lab_pass'</script>''')
 
-@login_required(login_url='/')
+@session_required
 
 
 def lab_add_user_search(request):
