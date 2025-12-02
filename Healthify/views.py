@@ -2090,23 +2090,22 @@ def user_view_notification(request):
 
 
 import json
-import numpy as np
+import math
 
 def cosine_similarity(list1, list2):
-    # Convert lists to numpy arrays
-    vector1 = np.array(list1)
-    vector2 = np.array(list2)
+    # Pure Python implementation of cosine similarity (no numpy needed)
+    # Calculate dot product
+    dot_product = sum(a * b for a, b in zip(list1, list2))
 
-    # Calculate the dot product
-    dot_product = np.dot(vector1, vector2)
-
-    # Calculate the magnitudes of the vectors
-    magnitude1 = np.linalg.norm(vector1)
-    magnitude2 = np.linalg.norm(vector2)
+    # Calculate magnitudes
+    magnitude1 = math.sqrt(sum(a * a for a in list1))
+    magnitude2 = math.sqrt(sum(b * b for b in list2))
 
     # Calculate cosine similarity
-    similarity = dot_product / (magnitude1 * magnitude2)
+    if magnitude1 == 0 or magnitude2 == 0:
+        return 0.0
 
+    similarity = dot_product / (magnitude1 * magnitude2)
     return similarity
 
 

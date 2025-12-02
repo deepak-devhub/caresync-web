@@ -1,17 +1,10 @@
 {
   "version": 2,
+  "buildCommand": "python manage.py collectstatic --noinput",
   "builds": [
     {
       "src": "health_connect/wsgi.py",
-      "use": "@vercel/python",
-      "config": {
-        "maxLambdaSize": "15mb",
-        "runtime": "python3.11"
-      }
-    },
-    {
-      "src": "static/**",
-      "use": "@vercel/static"
+      "use": "@vercel/python"
     }
   ],
   "routes": [
@@ -23,8 +16,5 @@
       "src": "/(.*)",
       "dest": "health_connect/wsgi.py"
     }
-  ],
-  "env": {
-    "PYTHON_VERSION": "3.11"
-  }
+  ]
 }
