@@ -1,20 +1,15 @@
 {
   "version": 2,
-  "buildCommand": "python manage.py collectstatic --noinput --clear",
   "builds": [
     {
       "src": "health_connect/wsgi.py",
       "use": "@vercel/python"
-    },
-    {
-      "src": "public/static",
-      "use": "@vercel/static"
     }
   ],
   "routes": [
     {
       "src": "/static/(.*)",
-      "dest": "/static/$1"
+      "dest": "/Healthify/static/$1"
     },
     {
       "src": "/(.*)",
