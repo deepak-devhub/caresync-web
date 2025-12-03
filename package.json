@@ -1,0 +1,7 @@
+{
+  "name": "caresync-web",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "bash -c 'echo \"================================\" && echo \"BUILD STARTED\" && echo \"================================\" && echo \"\" && echo \"Current directory:\" && pwd && echo \"\" && echo \"Directory contents:\" && ls -la && echo \"\" && echo \"Checking Python:\" && python --version && echo \"\" && echo \"Installing dependencies...\" && pip install -r requirements.txt && echo \"\" && echo \"Healthify/static contents:\" && (ls -la Healthify/static/ || echo \"NOT FOUND\") && echo \"\" && echo \"================================\" && echo \"COLLECTSTATIC\" && echo \"================================\" && python manage.py collectstatic --noinput --clear --verbosity 2 && echo \"\" && echo \"================================\" && echo \"RESULTS\" && echo \"================================\" && echo \"staticfiles directory:\" && ls -la staticfiles/ && echo \"\" && echo \"Size:\" && du -sh staticfiles/ && echo \"\" && echo \"Files (first 30):\" && find staticfiles -type f | head -30 && echo \"\" && echo \"Login files:\" && find staticfiles -path \"*/login/*\" -type f && echo \"\" && echo \"================================\" && echo \"BUILD COMPLETE\" && echo \"================================\"'"
+  }
+}
