@@ -154,7 +154,9 @@ STATICFILES_DIRS = [
 
 # Add this line for WhiteNoise to serve static files properly
 # STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+# STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+# Temporary - for testing
+STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
 
 
 MEDIA_URL = '/media/'
