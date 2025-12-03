@@ -10,7 +10,7 @@
   "routes": [
     {
       "src": "/static/(.*)",
-      "dest": "/staticfiles/$1"
+      "dest": "/Healthify/static/$1"
     },
     {
       "src": "/(.*)",
